@@ -47,4 +47,4 @@ function verify(encryptedCaptchaExpression, captchaSolution) {
 
 or
 
-`npm run tdd`
+`npm run test:tdd`

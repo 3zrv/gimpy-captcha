@@ -8,8 +8,9 @@
     "prepare": "npm run build",
     "build": "rimraf dist; tsc --skipLibCheck && cp -r fonts dist/fonts",
     "deploy": "tsc --skipLibCheck && cp -r fonts dist/fonts",
-    "test": "jest",
-    "tdd": "jest --watch"
+    "test": "jest --coverage",
+    "test:ci": "jest --ci --logHeapUsage --runInBand",
+    "test:tdd": "jest --watch --detectOpenHandles --colors"
   },
   "keywords": [],
   "author": "",
