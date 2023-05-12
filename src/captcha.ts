@@ -16,7 +16,7 @@ export type ILambdaCaptcha = {
   /**
    * An unencrypted representation of the captcha
    */
-  expr: any;
+  expr: string;
   /**
    * An unencrypted string representation of the captcha
    */
@@ -144,38 +144,58 @@ function renderCaptcha(
   return str;
 }
 
-function renderNoise(options: ILambdaCaptchaConfig) {
-  if (!options.noise) {
-    return [];
-  }
+/**
+ * Renders random noise lines and/or circles for a captcha image based on the provided options.
+ *
+ * @param {ILambdaCaptchaConfig} options The configuration options for the captcha image.
+ * @returns {string[]} An array of SVG path strings for the rendered noise lines and/or circles.
+ */
+function renderNoise(options: ILambdaCaptchaConfig): string[] {
+  // If noise is disabled, return an empty array
+  if (!options.noise) return [];
+
   const { width, height } = options;
   const hasColor = options.backgroundColor;
-  const noiseLines = [];
-  const min = 7;
-  const max = 15;
-  let i = -1;
+  const noiseShapes = [];
+  const minSize = 2;
+  const maxSize = 6;
 
-  while (++i < options.noise) {
-    const start = `${random.int(1, 21)} ${random.int(1, height - 1)}`;
-    const end = `${random.int(width - 21, width - 1)} ${random.int(
-      1,
-      height - 1
-    )}`;
-    const mid1 = `${random.int(width / 2 - 21, width / 2 + 21)} ${random.int(
-      1,
-      height - 1
-    )}`;
-    const mid2 = `${random.int(width / 2 - 21, width / 2 + 21)} ${random.int(
-      1,
-      height - 1
-    )}`;
-    const color = hasColor
-      ? random.color(hasColor)
-      : random.greyColor(min, max);
-    noiseLines.push(
-      `<path d="M${start} C${mid1},${mid2},${end}" stroke="${color}" fill="none"/>`
-    );
+  // Generate the specified number of noise shapes
+  for (let i = 0; i < options.noise; i++) {
+    let shape;
+
+    if (Math.random() < 0.5) {
+      // Generate a random line segment using Bezier curves
+      const start = `${random.int(1, 21)} ${random.int(1, height - 1)}`;
+      const end = `${random.int(width - 21, width - 1)} ${random.int(
+        1,
+        height - 1
+      )}`;
+      const mid1 = `${random.int(width / 2 - 21, width / 2 + 21)} ${random.int(
+        1,
+        height - 1
+      )}`;
+      const mid2 = `${random.int(width / 2 - 21, width / 2 + 21)} ${random.int(
+        1,
+        height - 1
+      )}`;
+      const color = hasColor
+        ? random.color(hasColor)
+        : random.greyColor(minSize, maxSize);
+      shape = `<path d="M${start} C${mid1},${mid2},${end}" stroke="${color}" fill="none"/>`;
+    } else {
+      // Generate a random circle
+      const cx = random.int(1, width - 1);
+      const cy = random.int(1, height - 1);
+      const r = random.int(minSize, maxSize);
+      const color = hasColor
+        ? random.color(hasColor)
+        : random.greyColor(minSize, maxSize);
+      shape = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}"/>`;
+    }
+
+    noiseShapes.push(shape);
   }
 
-  return noiseLines;
+  return noiseShapes;
 }
