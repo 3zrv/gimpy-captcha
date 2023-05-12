@@ -60,7 +60,7 @@ export class LambdaCaptchaMathExpression implements ILambdaCaptchaExpression {
   }
 
   public toString() {
-    let elements = [];
+    const elements = [];
 
     for (
       let operandIndex = 0;

@@ -129,7 +129,6 @@ function renderCaptcha(
   expression: ILambdaCaptchaExpression,
   config: ILambdaCaptchaConfig
 ): string {
-  let str: string;
   let background = "";
   let noise = "";
   const start = `<svg xmlns="http://www.w3.org/2000/svg" width="${150}" height="${80}" viewBox="0,0,${150},${80}">`;
@@ -141,7 +140,7 @@ function renderCaptcha(
   noise = renderNoise(config).join("");
 
   const text = renderText(expression.toString(), config);
-  str = `${start}${background}${text}${noise}</svg>`;
+  const str = `${start}${background}${text}${noise}</svg>`;
   return str;
 }
 
