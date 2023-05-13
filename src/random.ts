@@ -1,3 +1,59 @@
+function hslToRgb(hsl: string) {
+  // Parse the HSL values from the input string
+  const [hue, saturation, lightness] = hsl
+    .replace(/hsla?|\(|\)/g, "")
+    .split(",")
+    .map((v: string) => parseFloat(v));
+
+  // Convert the hue to a value between 0 and 360 (in degrees)
+  const h = ((hue % 360) + 360) % 360;
+
+  // Convert the saturation and lightness to values between 0 and 1
+  const s = saturation / 100;
+  const l = lightness / 100;
+
+  // Calculate the chroma (color intensity) and secondary components
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
+
+  // Calculate the RGB values based on the hue and chroma
+  let r, g, b;
+  if (h < 60) {
+    r = c;
+    g = x;
+    b = 0;
+  } else if (h < 120) {
+    r = x;
+    g = c;
+    b = 0;
+  } else if (h < 180) {
+    r = 0;
+    g = c;
+    b = x;
+  } else if (h < 240) {
+    r = 0;
+    g = x;
+    b = c;
+  } else if (h < 300) {
+    r = x;
+    g = 0;
+    b = c;
+  } else {
+    r = c;
+    g = 0;
+    b = x;
+  }
+
+  // Add the secondary components and convert the values to 8-bit integers
+  r = Math.round((r + m) * 255);
+  g = Math.round((g + m) * 255);
+  b = Math.round((b + m) * 255);
+
+  // Return the RGB values as an array of integers
+  return [r, g, b];
+}
+
 /**
  * Generates a random integer between the specified minimum and maximum values (inclusive).
  *
@@ -22,8 +78,10 @@ export const int = randomInt;
  * @returns {string} A random gray color value in hexadecimal format (#RRGGBB).
  */
 export function greyColor(min = 1, max = 9): string {
-  const int = randomInt(min, max).toString(16);
-  return `#${int}${int}${int}`;
+  const intensity = Math.floor((randomInt(min, max) * 255) / 15)
+    .toString(16)
+    .padStart(2, "0");
+  return `#${intensity}${intensity}${intensity}`;
 }
 
 /**
@@ -34,35 +92,27 @@ export function greyColor(min = 1, max = 9): string {
  * @throws {Error} If the input background color is not a valid 6-digit hexadecimal color code.
  */
 export function color(bgColor?: string): string {
-  // Generate a random hue value between 0 and 1
-  const hue = Math.random();
+  // Generate a random hue value between 0 and 360 (in degrees)
+  const hue = Math.floor(Math.random() * 360);
 
-  // Generate a random saturation value between 0.6 and 0.8
-  const saturation = randomInt(60, 80) / 100;
+  // Generate a random saturation value between 60% and 80%
+  const saturation = randomInt(60, 80);
 
   // Calculate the lightness range based on the input background color
   const bgLightness = bgColor ? getLightness(bgColor) : 1.0;
   const range = bgLightness >= 0.5 ? [-45, -25] : [25, 45];
 
   // Generate a random lightness value within the calculated range
-  const lightness =
-    randomInt(
-      Math.round(bgLightness * 100) + range[0],
-      Math.round(bgLightness * 100) + range[1]
-    ) / 100;
+  const lightness = (
+    Math.round(bgLightness * 100 + randomInt(range[0], range[1])) / 100
+  ).toFixed(2);
 
   // Calculate the RGB values using the HSL-to-RGB conversion formula
-  const q =
-    lightness < 0.5
-      ? lightness * (1 + saturation)
-      : lightness + saturation - lightness * saturation;
-  const p = 2 * lightness - q;
-  const r = Math.floor(hue2rgb(p, q, hue + 1 / 3) * 255);
-  const g = Math.floor(hue2rgb(p, q, hue) * 255);
-  const b = Math.floor(hue2rgb(p, q, hue - 1 / 3) * 255);
+  const hsl = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  const rgb = hslToRgb(hsl);
 
   // Convert the RGB values to hexadecimal format and return the color value
-  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+  return `#${rgb.map((c) => c.toString(16).padStart(2, "0")).join("")}`;
 }
 
 /**
@@ -72,7 +122,7 @@ export function color(bgColor?: string): string {
  * @returns {number} The relative lightness of the color, in the range from 0.0 to 1.0.
  * @returns {number} `-1.0` if the input color is not a valid 6-digit hexadecimal color code.
  */
-function getLightness(rgbColor: string): number {
+export function getLightness(rgbColor: string): number {
   const hexColor = rgbColor.startsWith("#") ? rgbColor.slice(1) : null;
 
   if (!hexColor || !/^[0-9A-Fa-f]{6}$/.test(hexColor)) return -1.0;
@@ -95,7 +145,7 @@ function getLightness(rgbColor: string): number {
  * @returns {number} The corresponding RGB value (between 0 and 1).
  */
 
-function hue2rgb(p: number, q: number, h: number): number {
+export function hue2rgb(p: number, q: number, h: number): number {
   const t = (h + 1) % 1;
   if (6 * t < 1) {
     return p + (q - p) * 6 * t;
