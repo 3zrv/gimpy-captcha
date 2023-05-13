@@ -1,8 +1,8 @@
-import { ILambdaCaptchaConfig } from "./config";
-import { LambdaCaptchaCodeExpression } from "./expressions/code-expression";
-import { ILambdaCaptchaExpression } from "./expressions/types";
+import { ICaptchaConfig } from "./config";
+import { CaptchaCodeExpression } from "./expressions/code-expression";
+import { ICaptchaExpression } from "./expressions/types";
 import { renderText } from "./font";
-import { LambdaCaptchaMathExpression } from "./expressions/math-expression";
+import { CaptchaMathExpression } from "./expressions/math-expression";
 import * as random from "./random";
 import {
   decrypt,
@@ -12,7 +12,7 @@ import {
 } from "./crypto";
 import * as errors from "./errors";
 
-export type ILambdaCaptcha = {
+export type ICaptcha = {
   /**
    * An unencrypted representation of the captcha
    */
@@ -32,15 +32,15 @@ export type ILambdaCaptcha = {
   validUntil: number;
 };
 
-export function create(config: ILambdaCaptchaConfig): ILambdaCaptcha {
-  let captcha: ILambdaCaptchaExpression;
+export function create(config: ICaptchaConfig): ICaptcha {
+  let captcha: ICaptchaExpression;
 
   switch (config.mode) {
     case "code":
-      captcha = LambdaCaptchaCodeExpression.generate(config.codeLength);
+      captcha = CaptchaCodeExpression.generate(config.codeLength);
       break;
     case "math":
-      captcha = LambdaCaptchaMathExpression.generate(2);
+      captcha = CaptchaMathExpression.generate(2);
       break;
     default:
       throw new Error(`unknown captcha mode ${config.mode}`);
@@ -70,7 +70,7 @@ export function verify(
   key: string,
   signatureKey: string
 ) {
-  let captcha: ILambdaCaptchaExpression & { type: string }, validUntil: number;
+  let captcha: ICaptchaExpression & { type: string }, validUntil: number;
   try {
     const message = verifySignature(
       encryptedExpression,
@@ -99,7 +99,7 @@ export function verify(
   switch (captcha.type) {
     case "code":
       {
-        const codeExpression = LambdaCaptchaCodeExpression.fromJSON(captcha);
+        const codeExpression = CaptchaCodeExpression.fromJSON(captcha);
         if (codeExpression.solve() === solution) {
           return true;
         }
@@ -107,7 +107,7 @@ export function verify(
       return errors.INVALID_SOLUTION;
     case "math":
       {
-        const mathExpression = LambdaCaptchaMathExpression.fromJSON(captcha);
+        const mathExpression = CaptchaMathExpression.fromJSON(captcha);
 
         if (mathExpression.solve().toString() === solution) {
           return true;
@@ -126,8 +126,8 @@ export function verify(
  * @returns string SVG representation
  */
 function renderCaptcha(
-  expression: ILambdaCaptchaExpression,
-  config: ILambdaCaptchaConfig
+  expression: ICaptchaExpression,
+  config: ICaptchaConfig
 ): string {
   let background = "";
   let noise = "";
@@ -147,10 +147,10 @@ function renderCaptcha(
 /**
  * Renders random noise lines and/or circles for a captcha image based on the provided options.
  *
- * @param {ILambdaCaptchaConfig} options The configuration options for the captcha image.
+ * @param {ICaptchaConfig} options The configuration options for the captcha image.
  * @returns {string[]} An array of SVG path strings for the rendered noise lines and/or circles.
  */
-function renderNoise(options: ILambdaCaptchaConfig): string[] {
+function renderNoise(options: ICaptchaConfig): string[] {
   // If noise is disabled, return an empty array
   if (!options.noise) return [];
 
@@ -165,17 +165,36 @@ function renderNoise(options: ILambdaCaptchaConfig): string[] {
     let shape;
 
     if (Math.random() < 0.5) {
-      // Generate a random line segment using Bezier curves
-      const start = `${random.int(1, 21)} ${random.int(1, height - 1)}`;
+      // Generate a random vertical line segment using Bezier curves
+      const start = `${random.int(1, width - 1)} ${random.int(1, 21)}`;
+      const end = `${random.int(1, width - 1)} ${random.int(
+        height - 21,
+        height - 1
+      )}`;
+      const mid1 = `${random.int(1, width - 1)} ${random.int(
+        height / 4,
+        height / 2
+      )}`;
+      const mid2 = `${random.int(1, width - 1)} ${random.int(
+        height / 2,
+        (height * 3) / 4
+      )}`;
+      const color = hasColor
+        ? random.color(hasColor)
+        : random.greyColor(minSize, maxSize);
+      shape = `<path d="M${start} C${mid1},${mid2},${end}" stroke="${color}" fill="none"/>`;
+    } else {
+      // Generate a random horizontal line segment using Bezier curves
+      const start = `${random.int(1, width - 21)} ${random.int(1, height - 1)}`;
       const end = `${random.int(width - 21, width - 1)} ${random.int(
         1,
         height - 1
       )}`;
-      const mid1 = `${random.int(width / 2 - 21, width / 2 + 21)} ${random.int(
+      const mid1 = `${random.int(width / 4, width / 2)} ${random.int(
         1,
         height - 1
       )}`;
-      const mid2 = `${random.int(width / 2 - 21, width / 2 + 21)} ${random.int(
+      const mid2 = `${random.int(width / 2, (width * 3) / 4)} ${random.int(
         1,
         height - 1
       )}`;
@@ -183,15 +202,6 @@ function renderNoise(options: ILambdaCaptchaConfig): string[] {
         ? random.color(hasColor)
         : random.greyColor(minSize, maxSize);
       shape = `<path d="M${start} C${mid1},${mid2},${end}" stroke="${color}" fill="none"/>`;
-    } else {
-      // Generate a random circle
-      const cx = random.int(1, width - 1);
-      const cy = random.int(1, height - 1);
-      const r = random.int(minSize, maxSize);
-      const color = hasColor
-        ? random.color(hasColor)
-        : random.greyColor(minSize, maxSize);
-      shape = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}"/>`;
     }
 
     noiseShapes.push(shape);
