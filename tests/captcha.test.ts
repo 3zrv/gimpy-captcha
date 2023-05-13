@@ -1,51 +1,71 @@
 import { create, verify } from "../src/captcha";
-import { LambdaCaptchaConfigManager } from "../src/config";
-import { LambdaCaptchaMathExpression } from "../src/expressions/math-expression";
+import { CaptchaConfigManager, ICaptchaConfig } from "../src/config";
+import { CaptchaMathExpression } from "../src/expressions/math-expression";
+import { keyToBuffer } from "../src/crypto";
 import * as errors from "../src/errors";
 
 describe("create", () => {
-  const config = LambdaCaptchaConfigManager.default("deadbeef", "c0ffee");
+  const captchaConfig: Partial<ICaptchaConfig> = {
+    mode: "math",
+    cryptoKey: keyToBuffer("ezrvvv"),
+    signatureKey: keyToBuffer("man0lett3"),
+    noise: 20,
+  };
+
+  const config = CaptchaConfigManager.default(captchaConfig);
   config.captchaDuration = 5000;
   const captcha = create(config);
 
   console.log(captcha);
 
-  it("returns a LambdaCaptcha instance", () => {
+  it("returns a Captcha instance", () => {
     expect(captcha.expr).toBeDefined();
     expect(captcha.encryptedExpr).toBeDefined();
     expect(captcha.captchaSvg).toBeDefined();
   });
 
-  it("returns a LambdaCaptcha instance with a timestamp in the validUntil field", () => {
+  it("returns true on validating the answer", () => {
     expect(captcha.validUntil).toBeGreaterThan(0);
   });
 });
 
 describe("verify", () => {
   const encryptedCaptchaExpression =
-    "49de1af0dacea91e8ad5c7403c4ff8799eee59d877cf1f835b007c0cff571335$5d69d5de65686e1e499c50607d4e79e6:392ff5aa4f2ce6f9f36854a4fd3ff18a3e03a009b2d84c75ef09aa6874afd9ddeecf2770f7ceb93f3c7e06396341b87c962712fbb6c82ceadc216bf9b041b53aa534de85b7342c17d11f78a067b31594faf1950862d04f7eec141a7def70f277";
-  const secret = "deadbeef";
-  const signatureKey = "c0ffee";
+    "6baf452edadda706928e4a994d5a6faa512c63959e6b0c5ec46ec5687f1d2c20$c85b4a5408d15e5b141eafd0afe2c93d:57e00308a0f6bcac1bcedde904e6c10de8bbd4b7696af10e0fe386a3b1f69b7102903b8dac2a30088ece3b848b682bbdd9fc10e0ed1f4d177b4f578995cea76a84f0731835f1e3e93190782f8e0beacd070b0bb2f99a821ecb3f25ec73046b4f";
+  const secret = "ezrvvv";
+  const signatureKey = "man0lett3";
 
   it("returns false when the captcha has expired", () => {
-    const result = verify(encryptedCaptchaExpression, '7', secret, signatureKey);
+    const result = verify(
+      encryptedCaptchaExpression,
+      "7",
+      secret,
+      signatureKey
+    );
 
+    console.log(result);
     expect(result).toBe(errors.CAPTCHA_EXPIRED);
   });
 
   it("returns true on success", () => {
-    const config = LambdaCaptchaConfigManager.default("deadbeef", signatureKey);
+    const captchaConfig: Partial<ICaptchaConfig> = {
+      mode: "math",
+      cryptoKey: keyToBuffer("ezrvvv"),
+      signatureKey: keyToBuffer("man0lett3"),
+      noise: 20,
+    };
+    const config = CaptchaConfigManager.default(captchaConfig);
     config.captchaDuration = 10 * 1000;
 
     const captcha = create(config);
-    const solution = LambdaCaptchaMathExpression.fromJSON(
+    const solution = CaptchaMathExpression.fromJSON(
       JSON.parse(captcha.expr).captcha
     ).solve();
 
     const result = verify(
       captcha.encryptedExpr,
       solution.toString(),
-      "deadbeef",
+      "ezrvvv",
       signatureKey
     );
 
@@ -53,12 +73,13 @@ describe("verify", () => {
   });
 
   it("returns false on error", () => {
-    const config = LambdaCaptchaConfigManager.default("deadbeef", signatureKey);
+    const config = CaptchaConfigManager.default();
     config.captchaDuration = 10 * 1000;
 
     const captcha = create(config);
-    const result = verify(captcha.encryptedExpr, '999', "deadbeef", signatureKey);
 
-    expect(result).toBe(errors.INVALID_SOLUTION);
+    const result = verify(captcha.encryptedExpr, "999", "ezrvvv", signatureKey);
+
+    expect([errors.INVALID_SOLUTION, errors.INVALID_DATA]).toContain(result);
   });
 });

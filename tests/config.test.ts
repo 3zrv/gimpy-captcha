@@ -1,14 +1,14 @@
-import { LambdaCaptchaConfigManager } from "./../src/config";
+import { CaptchaConfigManager } from "./../src/config";
 import { existsSync } from "fs";
 
-describe("LambdaCaptchaConfigManager", () => {
+describe("CaptchaConfigManager", () => {
   describe("default", () => {
     it("returns a config object", () => {
-      expect(LambdaCaptchaConfigManager.default('', '')).toHaveProperty("fontPath");
+      expect(CaptchaConfigManager.default('', '')).toHaveProperty("fontPath");
     });
     
     it("returns a valid default font path", () => {
-      expect(existsSync(LambdaCaptchaConfigManager.default('', '').fontPath)).toBeTruthy()
+      expect(existsSync(CaptchaConfigManager.default('', '').fontPath)).toBeTruthy()
     });
   });
 });
