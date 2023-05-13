@@ -1,18 +1,18 @@
-import { ILambdaCaptchaExpression } from "./types";
+import { ICaptchaExpression } from "./types";
 
-export class LambdaCaptchaCodeExpression implements ILambdaCaptchaExpression {
+export class CaptchaCodeExpression implements ICaptchaExpression {
   constructor(public readonly code: string) {}
 
-  static generate(length = 5): LambdaCaptchaCodeExpression {
+  static generate(length = 5): CaptchaCodeExpression {
     const code = Math.random().toString(36).substr(2, length);
 
-    return new LambdaCaptchaCodeExpression(code);
+    return new CaptchaCodeExpression(code);
   }
 
-  static fromJSON(o: any): LambdaCaptchaCodeExpression {
+  static fromJSON(o: object): CaptchaCodeExpression {
     return Object.setPrototypeOf(
       Object.assign({}, o),
-      LambdaCaptchaCodeExpression.prototype
+      CaptchaCodeExpression.prototype
     );
   }
 

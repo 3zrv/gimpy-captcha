@@ -1,16 +1,16 @@
-import { ILambdaCaptchaExpression } from "./types";
-const availableOperators: ILambdaCaptchaMathExpressionOperators[] = ["+", "-"];
-export type ILambdaCaptchaMathExpressionOperators = "+" | "-";
+import { ICaptchaExpression } from "./types";
+const availableOperators: ICaptchaMathExpressionOperators[] = ["+", "-"];
+export type ICaptchaMathExpressionOperators = "+" | "-";
 
-export class LambdaCaptchaMathExpression implements ILambdaCaptchaExpression {
+export class CaptchaMathExpression implements ICaptchaExpression {
   constructor(
     public readonly operands: number[],
-    public readonly operators: ILambdaCaptchaMathExpressionOperators[]
+    public readonly operators: ICaptchaMathExpressionOperators[]
   ) {}
 
-  static generate(operandCount = 2): LambdaCaptchaMathExpression {
+  static generate(operandCount = 2): CaptchaMathExpression {
     const operands = [];
-    const operators: ILambdaCaptchaMathExpressionOperators[] = [];
+    const operators: ICaptchaMathExpressionOperators[] = [];
 
     for (let i = 0; i < operandCount; i++) {
       operands.push(Math.max(Math.floor(Math.random() * 10), 1));
@@ -22,13 +22,13 @@ export class LambdaCaptchaMathExpression implements ILambdaCaptchaExpression {
       );
     }
 
-    return new LambdaCaptchaMathExpression(operands, operators);
+    return new CaptchaMathExpression(operands, operators);
   }
 
-  static fromJSON(o: any): LambdaCaptchaMathExpression {
+  static fromJSON(o: object): CaptchaMathExpression {
     return Object.setPrototypeOf(
       Object.assign({}, o),
-      LambdaCaptchaMathExpression.prototype
+      CaptchaMathExpression.prototype
     );
   }
 

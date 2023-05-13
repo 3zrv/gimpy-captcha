@@ -1,6 +1,4 @@
-// import { LambdaCaptchaMathExpression } from "./math-expression";
-
-export interface ILambdaCaptchaExpression {
+export interface ICaptchaExpression {
   solve(): number | string
-  toObject(): any
+  toObject(): object | string
 }
