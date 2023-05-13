@@ -3,13 +3,18 @@
 ### Generating a captcha
 
 ```js
-const lambdaCaptcha = require("captcha");
-const SECRET = process.env.CAPTCHA_SECRET;
+const Captcha = require("captcha");
+
+const captchaConfig = {
+  mode: "math", // or code
+  cryptoKey: "ezrvvv",
+  signatureKey: "man0lett3",
+  noise: 20,
+};
 
 function generateCaptcha() {
-  const captchaConfig =
-    lambdaCaptcha.LambdaCaptchaConfigManager.default(SECRET, 'code');
-  const captcha = lambdaCaptcha.create(captchaConfig);
+  const captchaConfig = Captcha.CaptchaConfigManager.default(captchaConfig);
+  const captcha = Captcha.create(captchaConfig);
 
   return {
     // The captcha SVG that you can display inside e.g. a form
@@ -28,14 +33,13 @@ function generateCaptcha() {
 ### Verifying a captcha
 
 ```js
-const lambdaCaptcha = require("captcha");
-const SECRET = process.env.CAPTCHA_SECRET;
+const Captcha = require("captcha");
 
 function verify(encryptedCaptchaExpression, captchaSolution) {
-  const captchaResult = lambdaCaptcha.verify(
+  const captchaResult = Captcha.verify(
     captchaExpression,
     captchaSolution,
-    SECRET
+    "ezrvvv"
   );
   return captchaResult; // either true on success or false if the solution was wrong
 }
