@@ -8,9 +8,9 @@
     "prepare": "npm run build",
     "build": "rimraf dist; tsc --skipLibCheck && cp -r fonts dist/fonts",
     "deploy": "tsc --skipLibCheck && cp -r fonts dist/fonts",
-    "test": "jest --coverage",
-    "test:ci": "jest --ci --logHeapUsage --runInBand",
-    "test:tdd": "jest --watch --detectOpenHandles --colors"
+    "test": "export TS_JEST_DISABLE_VER_CHECKER=true && jest --coverage",
+    "test:ci": "TS_JEST_DISABLE_VER_CHECKER=true jest --ci --logHeapUsage --runInBand",
+    "test:tdd": "TS_JEST_DISABLE_VER_CHECKER=true jest --watch --detectOpenHandles --colors"
   },
   "keywords": [],
   "author": "",
