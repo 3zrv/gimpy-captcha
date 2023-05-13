@@ -1,21 +1,33 @@
 import { loadSync, PathCommand } from "opentype.js";
 import { assert } from "console";
-import { ILambdaCaptchaConfig } from "./config";
+import { ICaptchaConfig } from "./config";
 
+/**
+ * Loads a font from the given file path.
+ * @param path - The file path to load the font from.
+ * @returns The loaded font.
+ */
 export function loadFont(path: string) {
   const font = loadSync(path);
-
   return font;
 }
 
-export function renderText(text: string, options: ILambdaCaptchaConfig) {
+/**
+ * Renders the given text using the specified configuration options.
+ * @param text - The text to render.
+ * @param options - The configuration options for rendering the text.
+ * @returns An array of SVG path strings representing the rendered text.
+ */
+export function renderText(text: string, options: ICaptchaConfig) {
   const font = loadFont(options.fontPath);
+
+  // Calculate spacing between characters
   const len = text.length;
   const spacing = (options.width - 2) / (len + 1);
 
+  // Render each character as a path string and add it to the output array
   let i = -1;
   const out = [];
-
   while (++i < len) {
     const x = spacing * (i + 1);
     const y = options.height / 2;
@@ -24,7 +36,6 @@ export function renderText(text: string, options: ILambdaCaptchaConfig) {
       font,
       Object.assign({ x, y }, options)
     );
-
     const color = options.textColor || "#000000";
     out.push(`<path fill="${color}" d="${charPath}"/>`);
   }
@@ -32,6 +43,11 @@ export function renderText(text: string, options: ILambdaCaptchaConfig) {
   return out;
 }
 
+/**
+ * Randomly modifies the coordinates of the given path command.
+ * @param cmd - The path command to modify.
+ * @returns The modified path command.
+ */
 function rndPathCmd(cmd: PathCommand) {
   const r = Math.random() * 0.2 - 0.1;
 
@@ -56,7 +72,7 @@ function rndPathCmd(cmd: PathCommand) {
   return cmd;
 }
 
-type RenderOptions = ILambdaCaptchaConfig & {
+type RenderOptions = ICaptchaConfig & {
   x: number;
   y: number;
 };
