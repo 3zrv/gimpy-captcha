@@ -1,6 +1,6 @@
 {
   "name": "gimpy-captcha",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "simple but hard to crack captcha library",
   "main": "dist/index.js",
   "scripts": {
