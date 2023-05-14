@@ -1,7 +1,7 @@
 {
   "name": "gimpy-captcha",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.1",
+  "description": "simple but hard to crack captcha library",
   "main": "dist/index.js",
   "scripts": {
     "lint": "eslint . --ext .ts",
