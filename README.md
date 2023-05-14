@@ -3,7 +3,7 @@
 ### Generating a captcha
 
 ```js
-const Captcha = require("captcha");
+const Captcha = require("gimpy-captcha");
 
 const captchaConfig = {
   mode: "math", // or code
