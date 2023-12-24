@@ -33,7 +33,7 @@ function generateCaptcha() {
 ### Verifying a captcha
 
 ```js
-const Captcha = require("captcha");
+const Captcha = require("gimpy-captcha");
 
 function verify(encryptedCaptchaExpression, captchaSolution) {
   const captchaResult = Captcha.verify(

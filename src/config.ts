@@ -1,53 +1,53 @@
-import { resolve } from "path";
-import { keyToBuffer } from "./crypto";
+import { resolve } from 'path'
+import { keyToBuffer } from './crypto'
 
 export type ICaptchaConfig = {
   /**
    * Path to OTF font file to use
    */
-  fontPath: string;
-  fontSize: number;
+  fontPath: string
+  fontSize: number
   /**
    * Mode of the captcha
    */
-  mode: "math" | "code";
+  mode: 'math' | 'code'
   /**
    * Key to encrypt the generated expression
    */
-  cryptoKey: Buffer;
+  cryptoKey: Buffer
   /**
    * Key to sign the encrypted message
    */
-  signatureKey: Buffer;
+  signatureKey: Buffer
   /**
    * SVG width
    */
-  width: number;
+  width: number
   /**
    * SVG height
    */
-  height: number;
+  height: number
   /**
    * SVG Background color
    */
-  backgroundColor?: string;
+  backgroundColor?: string
   /**
    * SVG Text color
    */
-  textColor?: string;
+  textColor?: string
   /**
    * Amount of noise
    */
-  noise?: number;
+  noise?: number
   /**
    * Captcha should be valid until `Date.now() + captchaDuration`
    */
-  captchaDuration: number;
+  captchaDuration: number
   /**
    * Length of generated code in 'code' mode
    */
-  codeLength?: number;
-};
+  codeLength?: number
+}
 
 export class CaptchaConfigManager {
   /**
@@ -58,17 +58,17 @@ export class CaptchaConfigManager {
    */
   static default(config: Partial<ICaptchaConfig> = {}): ICaptchaConfig {
     const defaults: ICaptchaConfig = {
-      fontPath: resolve(__dirname, "../fonts", "FiraCode-Bold.otf"),
+      fontPath: resolve(__dirname, '../fonts', 'FiraCode-Bold.otf'),
       fontSize: 40,
-      mode: "math",
+      mode: 'math',
       width: 150,
       height: 85,
       noise: 10,
-      cryptoKey: keyToBuffer(""),
-      signatureKey: keyToBuffer(""),
+      cryptoKey: keyToBuffer(''),
+      signatureKey: keyToBuffer(''),
       captchaDuration: 180 * 1000,
-    };
+    }
 
-    return { ...defaults, ...config };
+    return { ...defaults, ...config }
   }
 }

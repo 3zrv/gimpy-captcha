@@ -1,18 +1,16 @@
-import { loadFont } from "../src/font";
-import { join } from "path";
+import { loadFont } from '../src/font'
+import { join } from 'path'
 
-describe("loadFont", () => {
-  it("returns an opentype font on success", () => {
-    const font = loadFont(
-      join(__dirname, "../fonts/FiraCode-Bold.otf")
-    );
+describe('loadFont', () => {
+  it('returns an opentype font on success', () => {
+    const font = loadFont(join(__dirname, '../fonts/FiraCode-Bold.otf'))
 
-    expect(font).toBeDefined();
-  });
+    expect(font).toBeDefined()
+  })
 
-  it("throws on error", () => {
+  it('throws on error', () => {
     expect(() => {
-      loadFont(join(__dirname, "../fonts/nope.otf"));
-    }).toThrow();
-  });
-});
+      loadFont(join(__dirname, '../fonts/nope.otf'))
+    }).toThrow()
+  })
+})
